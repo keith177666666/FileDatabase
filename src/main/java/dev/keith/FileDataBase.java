@@ -1,6 +1,5 @@
 package dev.keith;
 
-import dev.keith.data.AbstractData;
 import dev.keith.data.StringData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,7 +67,7 @@ public class FileDataBase<K,
     public static <K, S extends IDataBaseObserver.Serializer<K, StringData>>
     void initial(AbstractFileDataBaseObserver<K, S> observer, File file) {
         if (observer != null) {
-            new FileDataBase<K, S>(observer, file);
+            new FileDataBase<>(observer, file);
         }
     }
     public static <K, S extends IDataBaseObserver.Serializer<K, StringData>>
