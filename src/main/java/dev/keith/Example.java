@@ -9,20 +9,20 @@ import java.io.IOException;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
-public class Test extends AbstractFileDataBaseObserver<String, Test.Serializer> {
+public final class Example extends AbstractFileDataBaseObserver<String, Example.ExampleSerializer> {
     public static void main(String[] args) {
-        Test t = new Test();
-        FileDataBase.initial(t);
-        FileDataBase<String, Serializer> db =
-                (FileDataBase<String, Serializer>)
+        Example instance = new Example();
+        FileDataBase.initial(instance);
+        FileDataBase<String, ExampleSerializer> db =
+                (FileDataBase<String, ExampleSerializer>)
                         DataBaseHelper.getInstance().getDefaultDataBase();
         db.clear();
         db.write(Pair.of("1", "oops"));
         System.out.println(db.read("1"));
     }
-    private final Serializer serializer = new Serializer(this);
+    private final ExampleSerializer serializer = new ExampleSerializer(this);
     @Override
-    public Serializer getSerializer() {
+    public ExampleSerializer getSerializer() {
         return serializer;
     }
 
@@ -30,11 +30,11 @@ public class Test extends AbstractFileDataBaseObserver<String, Test.Serializer> 
     public Function<String, StringData> getFactory() {
         return StringData::new;
     }
-    public static class Serializer implements IDataBaseObserver.Serializer<String, StringData> {
-        private final Test t;
+    public static class ExampleSerializer implements IDataBaseObserver.Serializer<String, StringData> {
+        private final Example observer;
 
-        public Serializer(Test t) {
-            this.t = t;
+        public ExampleSerializer(Example observer) {
+            this.observer = observer;
         }
 
 
@@ -44,10 +44,10 @@ public class Test extends AbstractFileDataBaseObserver<String, Test.Serializer> 
             for (String line : bufferedReader.lines().toList()) {
                 if (line.startsWith(key)) {
                     String toReturn = line.split(":")[1];
-                    return t.getFactory().apply(toReturn);
+                    return observer.getFactory().apply(toReturn);
                 }
             }
-            return t.getFactory().apply("null");
+            return observer.getFactory().apply("null");
         }
         @NotNull
         @Override
