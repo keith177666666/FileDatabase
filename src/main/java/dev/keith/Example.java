@@ -1,5 +1,6 @@
 package dev.keith;
 
+import dev.keith.data.StringData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,11 +31,12 @@ public final class Example extends AbstractFileDataBaseObserver<String, Example.
     public Function<String, StringData> getFactory() {
         return StringData::new;
     }
-    public static class ExampleSerializer implements IDataBaseObserver.Serializer<String, StringData> {
-        private final Example observer;
+    public static class ExampleSerializer extends
+            AbstractFileDataBaseObserver.Serializer<String, ExampleSerializer, Example>
+            implements IDataBaseObserver.Serializer<String, StringData> {
 
         public ExampleSerializer(Example observer) {
-            this.observer = observer;
+            super(observer);
         }
 
 

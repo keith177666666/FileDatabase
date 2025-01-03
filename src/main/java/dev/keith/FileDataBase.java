@@ -1,11 +1,12 @@
 package dev.keith;
 
+import dev.keith.data.AbstractData;
+import dev.keith.data.StringData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 
-@SuppressWarnings({"unchecked", "ignored"})
 public class FileDataBase<K,
         S extends IDataBaseObserver.Serializer<K, StringData>>
         implements IDataBase<K, String, StringData> {
@@ -14,18 +15,20 @@ public class FileDataBase<K,
     private BufferedWriter output = null;
     private static FileDataBase<?, ?> instance = null;
 
-    private FileDataBase(AbstractFileDataBaseObserver<?, ?> observer) {
+    private FileDataBase(AbstractFileDataBaseObserver<K, S> observer, File file) {
         if(instance == null) {
             instance = this;
             new DataBaseHelper(this, observer);
-            this.observer = (AbstractFileDataBaseObserver<K, S>) observer;
+            this.observer = observer;
             try {
-                this.input = new BufferedReader(new FileReader("./filedb.txt"));
-                this.output = new BufferedWriter(new FileWriter("./filedb.txt", true));
+                this.input = new BufferedReader(new FileReader(file));
+                this.output = new BufferedWriter(new FileWriter(file, true));
             } catch (FileNotFoundException e) {
                 File DBfile = new File("./filedb.txt");
                 try {
-                    DBfile.createNewFile();
+                    if (!DBfile.createNewFile()) {
+                        throw new IllegalStateException("File cannot be either found or created.");
+                    }
                     if (this.input == null) {
                         this.input = new BufferedReader(new FileReader("./filedb.txt"));
                     }
@@ -63,9 +66,17 @@ public class FileDataBase<K,
         }
     }
     public static <K, S extends IDataBaseObserver.Serializer<K, StringData>>
-    void initial(AbstractFileDataBaseObserver<?, ?> observer) {
+    void initial(AbstractFileDataBaseObserver<K, S> observer, File file) {
         if (observer != null) {
-            new FileDataBase<K, S>(observer);
+            new FileDataBase<K, S>(observer, file);
         }
+    }
+    public static <K, S extends IDataBaseObserver.Serializer<K, StringData>>
+    void initial(AbstractFileDataBaseObserver<K, S> observer, String directory) {
+        initial(observer, new File(directory));
+    }
+    public static <K, S extends IDataBaseObserver.Serializer<K, StringData>>
+    void initial(AbstractFileDataBaseObserver<K, S> observer) {
+        initial(observer, "./filedb.txt");
     }
 }
