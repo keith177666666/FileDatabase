@@ -13,7 +13,7 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 dependencies {
-    implementation 'com.github.keith177666666:FileDatabase:${DB_VERSION}'
+    implementation 'com.github.keith177666666:FileDatabase:v${DB_VERSION}'
 }
 ```
 This should be in either your gradle.properties or your build.gradle
