@@ -21,3 +21,4 @@ This should be in either your gradle.properties or your build.gradle
 let DB_VERSION = "YOUR DB VERSION"
 ```
 db version : [![](https://jitpack.io/v/keith177666666/FileDatabase.svg)](https://jitpack.io/#keith177666666/FileDatabase)
+db java doc : [javadoc](https://keith177666666.github.io/FileDataBase.io/index.html)
