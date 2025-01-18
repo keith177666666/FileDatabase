@@ -1,6 +1,7 @@
-package dev.keith;
+package dev.keith.fileDataBase;
 
-import dev.keith.data.StringData;
+import dev.keith.*;
+import dev.keith.fileDataBase.data.StringData;
 import dev.keith.event.DataBaseManger;
 import dev.keith.event.Parameters;
 import dev.keith.event.Proxy;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * A DataBase based on a file.
@@ -21,6 +23,15 @@ import java.util.List;
 public class FileDataBase<K,
         S extends IDataBaseObserver.Serializer<K, StringData>>
         implements IDataBase<K, String, StringData> {
+    static {
+        ServiceLoader<AbstractFileDataBaseObserver> loader =
+                ServiceLoader.load(AbstractFileDataBaseObserver.class);
+        AbstractFileDataBaseObserver<?, ?> observer = loader.stream()
+                .toList()
+                .getFirst()
+                .get();
+        FileDataBase.initial(observer);
+    }
     private final AbstractFileDataBaseObserver<K, S> observer;
     private BufferedReader input = null;
     private BufferedWriter output = null;
@@ -141,8 +152,7 @@ public class FileDataBase<K,
                 new Event("The Data of Data Base has been deleted, key: " + key,
                         Event.Type.DELETE, new Parameters(input, output, this))
         ));
-        observer.getSerializer().remove(key, input, output);
-        return ResultType.SUCCESS;
+        return observer.getSerializer().remove(key, input, output);
     }
 
     /**
@@ -189,5 +199,25 @@ public class FileDataBase<K,
      */
     public static File currentFile(FileDataBase<?, ?> db) {
         return db.file;
+    }
+
+    /**
+     * To auto initial the database and use this class.
+     */
+    public static class Provider implements IDataBaseProvider<FileDataBase> {
+        /**
+         * Default Constructor.
+         */
+        public Provider() {}
+
+        /**
+         * Internal method
+         * @return FileDataBase.class
+         */
+        @Override
+        @ApiStatus.Internal
+        public Class<FileDataBase> provide() {
+            return FileDataBase.class;
+        }
     }
 }

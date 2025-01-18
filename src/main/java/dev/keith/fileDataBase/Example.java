@@ -1,6 +1,7 @@
-package dev.keith;
+package dev.keith.fileDataBase;
 
-import dev.keith.data.StringData;
+import dev.keith.*;
+import dev.keith.fileDataBase.data.StringData;
 import dev.keith.event.Permission;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,15 +14,28 @@ import java.util.function.Function;
  */
 @SuppressWarnings({"unchecked"})
 public final class Example extends AbstractFileDataBaseObserver<Integer, Example.Serializer> {
+    static {
+        try {
+            // VERY IMPORTANT!!!
+            // Start the service to initial the database
+            Class.forName("dev.keith.DataBaseCore");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
     /**
      * Default main method to test
      * @param args args
      */
     public static void main(String[] args) {
         // initial the observer
-        Example instance = new Example();
+        // Example instance = new Example();
         // create database
-        FileDataBase.initial(instance);
+        // FileDataBase.initial(instance);
+        // The database has been initialed through module-info.java
+        // so no need for the above code,
+        // but you can manually initial it.
+
         // get the database through the DataBaseHelper
         FileDataBase<Integer, Serializer> db =
                 (FileDataBase<Integer, Serializer>)
@@ -35,11 +49,9 @@ public final class Example extends AbstractFileDataBaseObserver<Integer, Example
         //        /
         //      \/
         db.getManger().addProxyTo(event -> {
-            // check to see whether it is an "event" or not
+            // check to see whether it is a customized event or not
             if (!(event instanceof Event)) {
-                // return;
-                Permission.CUSTOM.setAction(parameters -> Permission.CUSTOM.setAction(Permission.ALLOWED.getAction()));
-                return Permission.CUSTOM;
+                return Permission.ALLOWED;
             }
             switch (((Event) event).type()) {
                 case WRITE -> System.out.println("message received by write method: " + event.message());
@@ -50,7 +62,7 @@ public final class Example extends AbstractFileDataBaseObserver<Integer, Example
             return Permission.ALLOWED;
         });
         // Example for writing into the database
-        db.write(Pair.of(1, "GUYS"));
+        db.write(Pair.of(1, "Hello World!"));
     }
 
     /**
@@ -156,12 +168,12 @@ public final class Example extends AbstractFileDataBaseObserver<Integer, Example
         /**
          * Remove the specific key and value.
          * @param integer key
-         * @param bufferedReader reader
-         * @param bufferedWriter writer
+         * @param dbFileReader reader
+         * @param dbFileWriter writer
          * @return a Result Type shows that is it successful or not.
          */
         @Override
-        public ResultType remove(Integer integer, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+        public ResultType remove(Integer integer, BufferedReader dbFileReader, BufferedWriter dbFileWriter) {
             initialDataBase();
             File file = new File(
                     FileDataBase.currentFile(db)
@@ -171,21 +183,37 @@ public final class Example extends AbstractFileDataBaseObserver<Integer, Example
                 if (!file.createNewFile()) {
                     return ResultType.FAIL;
                 }
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-                bufferedReader.lines() //Stream<String>
-                        .filter(s -> !s.startsWith(integer.toString())) // Stream<String>
+                BufferedReader tempFileReader = new BufferedReader(new FileReader(file));
+                BufferedWriter tempFileWriter = new BufferedWriter(new FileWriter(file));
+                dbFileReader.lines() //Stream<String>
+                        .filter(s -> {
+                            if (!s.isBlank()) {
+                                System.out.println("Filtered element: " + s);
+                                if (!s.startsWith(integer.toString())) {
+                                    System.out.println("Allowed element: " + s);
+                                }
+                                return !s.startsWith(integer.toString());
+                            }
+                            return false;
+                        }) // Stream<String>
                         .forEach(s -> {
                             try {
-                                writer.write(s);
+                                System.out.println("Written element into temp file: " + s);
+                                tempFileWriter.write(s);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         }); // Void
-                reader.lines()
+                try (PrintWriter printWriter = new PrintWriter(FileDataBase.currentFile(this.db))) {
+                    printWriter.print("");
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                tempFileReader.lines()
                         .forEach(s -> {
                             try {
-                                bufferedWriter.write(s);
+                                System.out.println("Written element into db file: " + s);
+                                dbFileWriter.write(s);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }

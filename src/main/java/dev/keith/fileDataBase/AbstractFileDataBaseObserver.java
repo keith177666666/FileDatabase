@@ -1,6 +1,7 @@
-package dev.keith;
+package dev.keith.fileDataBase;
 
-import dev.keith.data.StringData;
+import dev.keith.IDataBaseObserver;
+import dev.keith.fileDataBase.data.StringData;
 
 
 /**
