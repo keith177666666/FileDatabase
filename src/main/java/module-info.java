@@ -17,6 +17,9 @@ module FileDatabase {
     requires Database;
     requires org.jetbrains.annotations;
 
+    exports dev.keith.fileDataBase;
+    exports dev.keith.fileDataBase.data;
+
     provides IDataBaseProvider with FileDataBase.Provider;
 
     uses AbstractFileDataBaseObserver;

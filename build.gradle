@@ -3,7 +3,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "dev.keith"
+group = "dev.keith.fileDataBase"
 version = current_version
 
 repositories {
