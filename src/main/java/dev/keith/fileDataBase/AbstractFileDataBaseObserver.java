@@ -3,6 +3,10 @@ package dev.keith.fileDataBase;
 import dev.keith.IDataBaseObserver;
 import dev.keith.fileDataBase.data.StringData;
 
+import java.io.BufferedReader;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * An abstract template for custom initialing the observer.
@@ -38,5 +42,11 @@ public abstract class AbstractFileDataBaseObserver<K,
         protected Serializer(O observer) {
             this.observer = observer;
         }
+
+        /**
+         * Read all method implemented by the observer
+         * @param input the input reader
+         */
+        public abstract Set<Map.Entry<K, String>> readAll(BufferedReader input);
     }
 }

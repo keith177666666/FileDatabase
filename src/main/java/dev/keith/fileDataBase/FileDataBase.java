@@ -8,11 +8,10 @@ import dev.keith.event.Proxy;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * A DataBase based on a file.
@@ -84,6 +83,38 @@ public class FileDataBase<K,
                 new Event("The Data Base has been read, key: " + key, Event.Type.READ,
                         new Parameters(input, output, this))));
         return observer.getSerializer().deserialize(key, input);
+    }
+
+    /**
+     * read all the value in the database
+     * @return List of the value
+     */
+    @NotNull
+    @Override
+    @Unmodifiable
+    public List<StringData> readAll() {
+        proxyList.forEach(proxy -> proxy.callOnMethod(
+                new Event("The Data Base has been read", Event.Type.READ,
+                        new Parameters(input, output, this))));
+        List<StringData> l = new ArrayList<>();
+        ((AbstractFileDataBaseObserver.Serializer<K, ?, ?> ) observer.getSerializer())
+                .readAll(input).forEach(entry ->
+                        l.add(observer.getFactory().apply(entry.getValue())));
+        return l;
+    }
+
+    /**
+     * read all the key & value in the database
+     * @return set of the key and value
+     */
+    @NotNull
+    @Unmodifiable
+    public Set<Map.Entry<K, String>> readAll(Set<Map.Entry<K, String>> set) {
+        proxyList.forEach(proxy -> proxy.callOnMethod(
+                new Event("The Data Base has been read", Event.Type.READ,
+                        new Parameters(input, output, this))));
+        Set<Map.Entry<K, String>> l = new LinkedHashSet<>();
+        return ((AbstractFileDataBaseObserver.Serializer<K, ?, ?> ) observer.getSerializer()).readAll(input);
     }
 
     /**

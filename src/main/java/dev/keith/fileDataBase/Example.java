@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -104,6 +107,16 @@ public final class Example extends AbstractFileDataBaseObserver<Integer, Example
          */
         public Serializer(Example observer) {
             super(observer);
+        }
+
+        /**
+         * Read all method implemented by the observer
+         */
+        @Override
+        public Set<Map.Entry<Integer, String>> readAll(BufferedReader reader) {
+            Map<Integer, String> map = new HashMap<>();
+            reader.lines().forEach(s -> map.put(Integer.valueOf(s.split(":")[0]), s.split(":")[1]));
+            return map.entrySet();
         }
 
         /**
